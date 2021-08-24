@@ -55,6 +55,10 @@ payplug_sylius_payplug_plugin:
         refund_minimum_amount_requirement_not_met: Le montant à rembourser doit être d'au moins 0.10€
         oney_unavailable: La simulation de votre échéancier est temporairement indisponible. Vous retrouverez cette information à l'étape du paiement.
     form:
+        one_click_enable: Activer le One click
+        one_click_help: |
+            Permettez à vos clients d'enregistrer leurs coordonnées de carte de paiement pour effectuer ultérieurement
+            d'autres transactions
         oney_error: Il y a des informations manquantes pour pouvoir payer en utilisant Oney by Payplug
         complete_info:
             missing_title: Informations manquantes

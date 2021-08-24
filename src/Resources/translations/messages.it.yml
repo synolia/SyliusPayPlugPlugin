@@ -55,6 +55,8 @@ payplug_sylius_payplug_plugin:
         refund_minimum_amount_requirement_not_met: L’importo da rimborsare non può essere inferiore a 0.10€
         oney_unavailable: La simulazione del tuo piano di finanziamento non è per il momento disponibile. Queste informazioni ti saranno fornite al momento del pagamento.
     form:
+        one_click_help: |
+            Consenti ai tuoi clienti di salvare i dettagli della loro carta di credito per dopo
         oney_error: Mancano alcune informazioni per poter pagare con “Oney by Payplug”
         complete_info:
             missing_title: Informazioni mancanti

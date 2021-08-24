@@ -31,12 +31,14 @@ abstract class AbstractGatewayFactory extends GatewayFactory
 
         $config['payum.default_options'] = [
             'secretKey' => null,
+            'oneClick' => false,
         ];
 
         $config->defaults($config['payum.default_options']);
 
         $config['payum.required_options'] = [
             'secretKey',
+            'oneClick'
         ];
 
         $config['payum.api'] = function (ArrayObject $formConfig): PayPlugApiClientInterface {

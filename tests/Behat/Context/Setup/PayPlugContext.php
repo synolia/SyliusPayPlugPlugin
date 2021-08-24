@@ -59,6 +59,7 @@ final class PayPlugContext implements Context
 
         $paymentMethod->getGatewayConfig()->setConfig([
             'secretKey' => 'test',
+            'oneClick' => false,
             'payum.http_client' => '@payplug_sylius_payplug_plugin.api_client.payplug',
         ]);
 
@@ -79,6 +80,7 @@ final class PayPlugContext implements Context
 
         $paymentMethod->getGatewayConfig()->setConfig([
             'secretKey' => 'test',
+            'oneClick' => false,
             'payum.http_client' => '@payplug_sylius_payplug_plugin.api_client.payplug',
         ]);
 

@@ -55,6 +55,9 @@ payplug_sylius_payplug_plugin:
         refund_minimum_amount_requirement_not_met: The amount to be refunded must be at least €0.10
         oney_unavailable: Your payment schedule simulation is temporarily unavailable. You will find this information at the payment stage.
     form:
+        one_click_enable: Enable One click
+        one_click_help: |
+            Allow your customers to save their credit card details for later
         oney_error: Some missing information is required to pay using Oney by Payplug
         complete_info:
             missing_title: Missing information

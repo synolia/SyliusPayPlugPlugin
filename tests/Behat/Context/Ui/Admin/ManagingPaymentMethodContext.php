@@ -77,7 +77,7 @@ final class ManagingPaymentMethodContext implements Context
             ],
             'permissions' => [
                 'use_live_mode' => true,
-                'can_save_cards' => false,
+                'can_save_cards' => true,
             ],
         ];
         $requestMock
