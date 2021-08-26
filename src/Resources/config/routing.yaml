@@ -26,3 +26,9 @@ payplug_sylius_oney_is_product_eligible:
     methods: ['GET']
     defaults:
         _controller: 'PayPlug\SyliusPayPlugPlugin\Controller\OneyIsProductEligible'
+
+payplug_sylius_shop_account_saved_cards:
+    path: /{_locale}/account/saved-cards
+    methods: ['GET']
+    defaults:
+        _controller: 'PayPlug\SyliusPayPlugPlugin\Controller\SavedCardsController'
