@@ -83,12 +83,13 @@ jobs:
             fail-fast: false
             matrix:
                 php: [7.3, 7.4]
-                sylius: [1.8.*, 1.9.*]
+                sylius: [1.8.*, 1.9.*, 1.10.*]
                 symfony: [4.4.*]
                 node: [10.x]
 
         env:
             APP_ENV: test
+            DATABASE_URL: "mysql://root:@127.0.0.1:3306/sylius_test?serverVersion=mariadb-10.4.11"
             package-name: payplug/sylius-payplug-plugin
 
         steps:
@@ -213,11 +214,6 @@ jobs:
               run: |
                   php bin/console translation:update en PayPlugSyliusPayPlugPlugin --dump-messages
                   php bin/console translation:update fr PayPlugSyliusPayPlugPlugin --dump-messages
-
-            - name: Sylius - Set database config
-              working-directory: ./sylius
-              run: |
-                  echo 'DATABASE_URL=mysql://root:@127.0.0.1:3306/payplug_plugin_%kernel.environment%?serverVersion=mariadb-10.4.11' >> .env
 
             - name: Sylius - Install
               working-directory: ./sylius
