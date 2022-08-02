@@ -196,7 +196,6 @@ final class CaptureAction implements ActionInterface, ApiAwareInterface, Gateway
 
         $notifyToken = $this->tokenFactory->createNotifyToken($token->getGatewayName(), $token->getDetails());
         $notificationUrl = $notifyToken->getTargetUrl();
-
         $details['notification_url'] = $notificationUrl;
 
         return $details;
@@ -209,16 +208,13 @@ final class CaptureAction implements ActionInterface, ApiAwareInterface, Gateway
     private function createPayment(ArrayObject $details, Capture $request): Payment
     {
         try {
-            $detailsCopy = $details->getArrayCopy();
-
-            if (array_key_exists('payment_id', $detailsCopy)
-                && array_key_exists('status', $detailsCopy)) {
+            if ($details->offsetExists('payment_id')
+                && $details->offsetExists('status')) {
                 $this->abortPaymentProcessor->process($request->getFirstModel());
-                unset($detailsCopy['status'], $detailsCopy['payment_id'], $detailsCopy['is_live']);
-                $details = new ArrayObject($detailsCopy);
+                unset($details['status'], $details['payment_id'], $details['is_live']);
             }
 
-            $payment = $this->payPlugApiClient->createPayment($detailsCopy);
+            $payment = $this->payPlugApiClient->createPayment($details->getArrayCopy());
             $details['payment_id'] = $payment->id;
             $details['is_live'] = $payment->is_live;
 
@@ -229,7 +225,6 @@ final class CaptureAction implements ActionInterface, ApiAwareInterface, Gateway
             return $payment;
         } catch (BadRequestException $badRequestException) {
             $details['status'] = PayPlugApiClientInterface::FAILED;
-
             throw $badRequestException;
         } catch (\Throwable $throwable) {
             $details['status'] = PayPlugApiClientInterface::FAILED;

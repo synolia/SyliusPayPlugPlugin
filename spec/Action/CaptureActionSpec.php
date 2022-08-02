@@ -94,6 +94,7 @@ final class CaptureActionSpec extends ObjectBehavior
         $arrayObject->offsetGet('order_number')->willReturn('000001');
         $arrayObject->offsetGet('initiator')->shouldBeCalled();
 
+        $arrayObject->offsetExists('payment_id')->shouldBeCalled();
         $arrayObject->offsetExists('status')->shouldBeCalled();
         $arrayObject->offsetSet('hosted_payment', ['return_url' => 'url', 'cancel_url' => 'url?&status=canceled'])->shouldBeCalled();
         $arrayObject->offsetSet('notification_url', 'url')->shouldBeCalled();
