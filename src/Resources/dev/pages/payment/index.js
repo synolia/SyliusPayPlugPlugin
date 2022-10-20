@@ -61,6 +61,49 @@ const Payment = {
       });
     });
   },
+  applePayHandler() {
+    $(".payment-item .checkbox input:radio").on('change', this.onPaymentMethodChoice);
+    $(document).on('click', "apple-pay-button", this.onApplePayButtonClick);
+  },
+  onPaymentMethodChoice(event) {
+    const isApplePay = $(event.currentTarget).closest('.checkbox-applepay').length;
+    const applePayButton = $("apple-pay-button");
+    const nextStepButton = $('form[name="sylius_checkout_select_payment"] .select-payment-submit #next-step');
+
+    console.log(isApplePay);
+
+    if (isApplePay) {
+      if (applePayButton.length) {
+        applePayButton.addClass('enabled');
+      }
+
+      nextStepButton.replaceWith(
+        $("<span/>", {
+          id: 'next-step',
+          class: 'ui large disabled icon labeled button',
+          html: nextStepButton.html()
+        })
+      );
+    } else {
+      if (applePayButton.length) {
+        applePayButton.removeClass('enabled');
+      }
+
+      nextStepButton.replaceWith(
+        $("<button/>", {
+          type: 'submit',
+          id: 'next-step',
+          class: 'ui large primary icon labeled button',
+          html: nextStepButton.html()
+        })
+      );
+    }
+  },
+  onApplePayButtonClick(event)
+  {
+    const applePayButton = $(event.currentTarget);
+
+  },
   disableNextStepButton() {
     const nextStepButton = $('form[name="sylius_checkout_select_payment"] .select-payment-submit #next-step');
     nextStepButton.replaceWith(
