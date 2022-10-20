@@ -46,6 +46,12 @@
                 </label>
             {% elseif method.gatewayConfig.factoryName == payplugFactoryName %}
                 {{ form_label(form, null, {'label_attr': {'data-test-payment-method-label': '', 'data-gateway': 'payplug'}}) }}
+            {% elseif method.gatewayConfig.factoryName == applePayFactoryName %}
+                <div class="apple-pay-method">
+                    <label for="{{ form.vars.id }}" data-test-payment-method-label="" data-gateway="apple-pay">{{ form.vars.label }}
+                        <img src="{{ asset('bundles/payplugsyliuspayplugplugin/assets/apple-pay/logo.svg') }}" class="apple-pay-logo" alt="Apple Pay" height="45" width="60" />
+                    </label>
+                </div>
             {% elseif method.gatewayConfig.factoryName == bancontactFactoryName %}
                 <div class="bancontact-method">
                     <label for="{{ form.vars.id }}" data-test-payment-method-label="" data-gateway="bancontact">{{ form.vars.label }}
@@ -80,8 +86,13 @@
 
         {% if method.gatewayConfig.factoryName == applePayFactoryName %}
             <script src="https://applepay.cdn-apple.com/jsapi/v1/apple-pay-sdk.js"></script>
-
-            <apple-pay-button id="payplug-applepay-btn" onclick="apple();" buttonstyle="black" type="plain" locale="en"></apple-pay-button>
+            <apple-pay-button id="payplug-applepay-btn"
+                              class="ui small button black"
+                              onclick="apple();"
+                              buttonstyle="black"
+                              type="pay"
+                              locale="{{ app.request.locale }}"
+            ></apple-pay-button>
             <div>
                 <script>
                     function apple() {
