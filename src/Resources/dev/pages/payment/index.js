@@ -67,8 +67,12 @@ const Payment = {
   },
   onPaymentMethodChoice(event) {
     const isApplePay = $(event.currentTarget).closest('.checkbox-applepay').length;
-    const applePayButton = $("apple-pay-button");
+    const applePayButton = $(document).find("apple-pay-button");
     const nextStepButton = $('form[name="sylius_checkout_select_payment"] .select-payment-submit #next-step');
+
+    console.log(isApplePay);
+    console.log(applePayButton);
+    console.log(nextStepButton);
 
     if (isApplePay) {
       if (applePayButton.length) {
