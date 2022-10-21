@@ -300,7 +300,6 @@ var Payment = {
             $.ajax({
                 url: requestSettings.paymentAuthorizedRoute,
                 method: 'POST',
-                async: false,
                 cache: false,
                 data: {
                     token: event.payment.token
@@ -335,7 +334,6 @@ var Payment = {
             console.log('Cancelling Apple Pay session!');
             $.ajax({
                 url: requestSettings.sessionCancelRoute,
-                async: false,
                 cache: false,
                 method: 'POST',
                 data: {},

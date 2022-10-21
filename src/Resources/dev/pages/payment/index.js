@@ -160,7 +160,6 @@ const Payment = {
       $.ajax({
         url: requestSettings.paymentAuthorizedRoute,
         method: 'POST',
-        async: false,
         cache: false,
         data: {
           token: event.payment.token
@@ -204,7 +203,6 @@ const Payment = {
 
       $.ajax({
         url: requestSettings.sessionCancelRoute,
-        async: false,
         cache: false,
         method: 'POST',
         data: {},
