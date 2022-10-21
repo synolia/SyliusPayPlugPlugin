@@ -118,6 +118,10 @@
     }
 
     apple-pay-button {
+        --apple-pay-button-height: 45px;
+        max-width: 222px;
+        transition: background-color 0.3s ease-in-out;
+
         &.button {
             min-width: 0;
             min-height: 0;
