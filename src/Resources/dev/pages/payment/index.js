@@ -61,44 +61,61 @@ const Payment = {
       });
     });
   },
+  disableNextStepButton() {
+    const nextStepButton = $('form[name="sylius_checkout_select_payment"] .select-payment-submit #next-step');
+    nextStepButton.replaceWith(
+      $("<span/>", {
+        id: 'next-step',
+        class: 'ui large disabled icon labeled button',
+        html: nextStepButton.html()
+      })
+    );
+  },
+  enableNextStepButton() {
+    const nextStepButton = $('form[name="sylius_checkout_select_payment"] .select-payment-submit #next-step');
+    nextStepButton.replaceWith(
+      $("<button/>", {
+        type: 'submit',
+        id: 'next-step',
+        class: 'ui large primary icon labeled button',
+        html: nextStepButton.html()
+      })
+    );
+  },
+  showApplePayButton() {
+    const applePayButton = $(document).find("apple-pay-button");
+    if (applePayButton.length) {
+      applePayButton.addClass('enabled');
+    }
+  },
+  hideApplePayButton() {
+    const applePayButton = $(document).find("apple-pay-button.enabled");
+    if (applePayButton.length) {
+      applePayButton.removeClass('enabled');
+    }
+  },
   applePayHandler() {
+    const applePayChoice = $(".payment-item .checkbox-applepay input:radio");
+    if (applePayChoice) {
+      if (applePayChoice.is(':checked')) {
+        Payment.disableNextStepButton();
+        Payment.showApplePayButton();
+      } else {
+        Payment.enableNextStepButton();
+        Payment.hideApplePayButton();
+      }
+    }
     $(".payment-item .checkbox input:radio").on('change', this.onPaymentMethodChoice);
     $(document).find("apple-pay-button").on('click', this.onApplePayButtonClick);
   },
   onPaymentMethodChoice(event) {
     const isApplePay = $(event.currentTarget).closest('.checkbox-applepay').length;
-    const applePayButton = $(document).find("apple-pay-button");
-    const nextStepButton = $('form[name="sylius_checkout_select_payment"] .select-payment-submit #next-step');
-
-    console.log(isApplePay);
-    console.log(applePayButton);
-    console.log(nextStepButton);
-
     if (isApplePay) {
-      if (applePayButton.length) {
-        applePayButton.addClass('enabled');
-      }
-
-      nextStepButton.replaceWith(
-        $("<span/>", {
-          id: 'next-step',
-          class: 'ui large disabled icon labeled button',
-          html: nextStepButton.html()
-        })
-      );
+      Payment.showApplePayButton();
+      Payment.disableNextStepButton();
     } else {
-      if (applePayButton.length) {
-        applePayButton.removeClass('enabled');
-      }
-
-      nextStepButton.replaceWith(
-        $("<button/>", {
-          type: 'submit',
-          id: 'next-step',
-          class: 'ui large primary icon labeled button',
-          html: nextStepButton.html()
-        })
-      );
+      Payment.hideApplePayButton();
+      Payment.enableNextStepButton();
     }
   },
   onApplePayButtonClick(event)
