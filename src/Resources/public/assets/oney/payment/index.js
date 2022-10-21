@@ -206,7 +206,7 @@ var Payment = {
     },
     applePayHandler: function() {
         $(".payment-item .checkbox input:radio").on('change', this.onPaymentMethodChoice);
-        $(document).on('click', "apple-pay-button", this.onApplePayButtonClick);
+        $(document).find("apple-pay-button").on('click', this.onApplePayButtonClick);
     },
     onPaymentMethodChoice: function(event) {
         var isApplePay = $(event.currentTarget).closest('.checkbox-applepay').length;
@@ -236,25 +236,7 @@ var Payment = {
             console.error('Invalid Apple Pay settings!');
             return false;
         }
-        /*{
-      "countryCode": "FR",
-      "currencyCode": "EUR",
-      "merchantCapabilities": [
-        "supports3DS"
-      ],
-      "supportedNetworks": [
-        "visa",
-        "mastercard"
-      ],
-      "total": {
-        "label": "Demo (Card is not charged)",
-        "type": "final",
-        "amount": "{{ order.total/100 }}"
-      },
-      'applicationData': btoa(JSON.stringify({
-        'apple_pay_domain': 'ppsylappay.eu-1.sharedwithexpose.com'
-      }))
-    };*/ // Create ApplePaySession
+        // Create ApplePaySession
         var session = new ApplePaySession(3, requestSettings);
         session.onvalidatemerchant = function() {
             var _ref = _helpers.asyncToGenerator(_regeneratorRuntimeDefault.default.mark(function _callee(event) {
