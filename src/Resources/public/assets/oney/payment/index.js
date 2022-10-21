@@ -206,7 +206,7 @@ var Payment = {
     },
     applePayHandler: function() {
         $(".payment-item .checkbox input:radio").on('change', this.onPaymentMethodChoice);
-        $("apple-pay-button").on('click', this.onApplePayButtonClick);
+        $(document).on('click', "apple-pay-button", this.onApplePayButtonClick);
     },
     onPaymentMethodChoice: function(event) {
         var isApplePay = $(event.currentTarget).closest('.checkbox-applepay').length;
@@ -264,7 +264,6 @@ var Payment = {
                             $.ajax({
                                 url: requestSettings.validateMerchantRoute,
                                 method: 'POST',
-                                async: true,
                                 cache: false,
                                 data: {},
                                 success: function(authorization) {
