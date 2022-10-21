@@ -283,7 +283,7 @@ var Payment = {
                                 error: function(XHR, status, error) {
                                     console.log(XHR, status, error);
                                     session.abort();
-                                    window.location.reload();
+                                //window.location.reload();
                                 }
                             });
                         case 1:
@@ -321,13 +321,13 @@ var Payment = {
                         window.location.href = authorization.data.returnUrl;
                     } catch (err) {
                         console.error(err);
-                        window.location.reload();
+                    //window.location.reload();
                     }
                 },
                 error: function(XHR, status, error) {
                     console.log(XHR, status, error);
                     session.abort();
-                    window.location.reload();
+                //window.location.reload();
                 }
             });
         };
@@ -346,7 +346,7 @@ var Payment = {
                 },
                 error: function(XHR, status, error) {
                     console.log(XHR, status, error);
-                    window.location.reload();
+                //window.location.reload();
                 }
             });
         };
