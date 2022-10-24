@@ -255,13 +255,12 @@ var Payment = {
     },
     onApplePayButtonClick: function(event1) {
         var applePayButton = $(event1.currentTarget);
-        var requestSettings = applePayButton.data('settings');
-        if (requestSettings === undefined) {
+        if (applePaySessionRequestSettings === undefined) {
             console.error('Invalid Apple Pay settings!');
             return false;
         }
         // Create ApplePaySession
-        var session = new ApplePaySession(3, requestSettings);
+        var session = new ApplePaySession(3, applePaySessionRequestSettings);
         session.onvalidatemerchant = function() {
             var _ref = _helpers.asyncToGenerator(_regeneratorRuntimeDefault.default.mark(function _callee(event) {
                 return _regeneratorRuntimeDefault.default.wrap(function _callee$(_ctx) {
