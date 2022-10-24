@@ -151,7 +151,7 @@ const Payment = {
         error: (XHR, status, error) => {
           console.log(XHR, status, error);
           session.abort();
-          //window.location.reload();
+          window.location.reload();
         },
       });
     };
@@ -187,13 +187,13 @@ const Payment = {
             window.location.href = authorization.data.returnUrl;
           } catch (err) {
             console.error(err);
-            //window.location.reload();
+            window.location.reload();
           }
         },
         error: (XHR, status, error) => {
           console.log(XHR, status, error);
           session.abort();
-          //window.location.reload();
+          window.location.reload();
         },
       });
     };
@@ -213,7 +213,7 @@ const Payment = {
         },
         error: (XHR, status, error) => {
           console.log(XHR, status, error);
-          //window.location.reload();
+          window.location.reload();
         },
       });
     };
