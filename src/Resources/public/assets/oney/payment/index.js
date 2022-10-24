@@ -268,7 +268,7 @@ var Payment = {
                     while(1)switch(_ctx.prev = _ctx.next){
                         case 0:
                             $.ajax({
-                                url: requestSettings.validateMerchantRoute,
+                                url: applePayButton.data('validate-merchant-route'),
                                 method: 'POST',
                                 cache: false,
                                 data: {},
@@ -298,7 +298,7 @@ var Payment = {
         }();
         session.onpaymentauthorized = function(event) {
             $.ajax({
-                url: requestSettings.paymentAuthorizedRoute,
+                url: applePayButton.data('payment-authorized-route'),
                 method: 'POST',
                 cache: false,
                 data: {
@@ -333,7 +333,7 @@ var Payment = {
         session.oncancel = function(event) {
             console.log('Cancelling Apple Pay session!');
             $.ajax({
-                url: requestSettings.sessionCancelRoute,
+                url: applePayButton.data('session-cancel-route'),
                 cache: false,
                 method: 'POST',
                 data: {},
