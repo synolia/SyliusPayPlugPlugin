@@ -18,6 +18,7 @@ final class ApplePayChecker implements ApplePayCheckerInterface
 
     public function isDeviceReady(): bool
     {
+        return true;
         $mainRequest = $this->requestStack->getMainRequest();
         if (!$mainRequest instanceof Request) {
             return false;
