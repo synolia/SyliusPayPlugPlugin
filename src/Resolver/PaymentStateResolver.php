@@ -10,31 +10,21 @@ use Payplug\Resource\PaymentAuthorization;
 use PayPlug\SyliusPayPlugPlugin\ApiClient\PayPlugApiClientInterface;
 use PayPlug\SyliusPayPlugPlugin\Gateway\PayPlugGatewayFactory;
 use Payum\Core\Model\GatewayConfigInterface;
-use SM\Factory\FactoryInterface;
 use SM\StateMachine\StateMachineInterface;
 use Sylius\Component\Core\Model\PaymentInterface;
 use Sylius\Component\Core\Model\PaymentMethodInterface;
 use Sylius\Component\Payment\PaymentTransitions;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 final class PaymentStateResolver implements PaymentStateResolverInterface
 {
-    /** @var FactoryInterface */
-    private $stateMachineFactory;
-
-    /** @var PayPlugApiClientInterface */
-    private $payPlugApiClient;
-
-    /** @var EntityManagerInterface */
-    private $paymentEntityManager;
+    public $stateMachineFactory;
 
     public function __construct(
-        FactoryInterface $stateMachineFactory,
-        PayPlugApiClientInterface $payPlugApiClient,
-        EntityManagerInterface $paymentEntityManager
+        #[Autowire('@payplug_sylius_payplug_plugin.api_client.payplug')]
+        private PayPlugApiClientInterface $payPlugApiClient,
+        private EntityManagerInterface $paymentEntityManager,
     ) {
-        $this->stateMachineFactory = $stateMachineFactory;
-        $this->payPlugApiClient = $payPlugApiClient;
-        $this->paymentEntityManager = $paymentEntityManager;
     }
 
     public function resolve(PaymentInterface $payment): void
@@ -42,8 +32,10 @@ final class PaymentStateResolver implements PaymentStateResolverInterface
         /** @var PaymentMethodInterface $paymentMethod */
         $paymentMethod = $payment->getMethod();
 
-        if (!$paymentMethod->getGatewayConfig() instanceof GatewayConfigInterface ||
-            PayPlugGatewayFactory::FACTORY_NAME !== $paymentMethod->getGatewayConfig()->getFactoryName()) {
+        if (
+            !$paymentMethod->getGatewayConfig() instanceof GatewayConfigInterface ||
+            PayPlugGatewayFactory::FACTORY_NAME !== $paymentMethod->getGatewayConfig()->getFactoryName()
+        ) {
             return;
         }
 
@@ -91,13 +83,7 @@ final class PaymentStateResolver implements PaymentStateResolverInterface
     private function isAuthorized(Payment $payment): bool
     {
         $now = new \DateTimeImmutable();
-        if ($payment->__isset('authorization') &&
-            $payment->__get('authorization') instanceof PaymentAuthorization &&
-            null !== $payment->__get('authorization')->__get('expires_at') &&
-            $now < $now->setTimestamp($payment->__get('authorization')->__get('expires_at'))) {
-            return true;
-        }
 
-        return false;
+        return $payment->__isset('authorization') && $payment->__get('authorization') instanceof PaymentAuthorization && null !== $payment->__get('authorization')->__get('expires_at') && $now < $now->setTimestamp($payment->__get('authorization')->__get('expires_at'));
     }
 }

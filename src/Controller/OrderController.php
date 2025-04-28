@@ -36,20 +36,21 @@ use Sylius\Component\Resource\ResourceActions;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\AsController;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Lock\LockFactory;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Webmozart\Assert\Assert;
 
+#[AsController]
 final class OrderController extends BaseOrderController
 {
-    private const APPLE_ERROR_RESPONSE_CODE = 0;
-    private const APPLE_SUCCESS_RESPONSE_CODE = 1;
+    public $stateMachineFactory;
 
-    private ApplePayPaymentProvider $applePayPaymentProvider;
-    private \SM\Factory\FactoryInterface $stateMachineFactory;
-    private LockFactory $lockFactory;
-    private LoggerInterface $logger;
+    private const APPLE_ERROR_RESPONSE_CODE = 0;
+
+    private const APPLE_SUCCESS_RESPONSE_CODE = 1;
 
     public function __construct(
         MetadataInterface $metadata,
@@ -69,10 +70,9 @@ final class OrderController extends BaseOrderController
         ?StateMachineInterface $stateMachine,
         ResourceUpdateHandlerInterface $resourceUpdateHandler,
         ResourceDeleteHandlerInterface $resourceDeleteHandler,
-        ApplePayPaymentProvider $applePayPaymentProvider,
-        \SM\Factory\FactoryInterface $stateMachineFactory,
-        LockFactory $lockFactory,
-        LoggerInterface $logger
+        private ApplePayPaymentProvider $applePayPaymentProvider,
+        private LockFactory $lockFactory,
+        private LoggerInterface $logger,
     ) {
         parent::__construct(
             $metadata,
@@ -91,15 +91,26 @@ final class OrderController extends BaseOrderController
             $eventDispatcher,
             $stateMachine,
             $resourceUpdateHandler,
-            $resourceDeleteHandler
+            $resourceDeleteHandler,
         );
-
-        $this->applePayPaymentProvider = $applePayPaymentProvider;
-        $this->stateMachineFactory = $stateMachineFactory;
-        $this->lockFactory = $lockFactory;
-        $this->logger = $logger;
     }
 
+    #[Route(
+        path: '/payplug/apple-pay/prepare/{orderId}',
+        name: 'payplug_shop_checkout_apple_prepare',
+        options: [
+            '_sylius' => [
+                'flash' => false,
+                'repository' => [
+                    'method' => 'find',
+                    'arguments' => [
+                        'expr:service("PayPlug\\SyliusPayPlugPlugin\\Provider\\ApplePayOrderProvider").getCurrentCart()',
+                    ],
+                ],
+            ],
+        ],
+        methods: ['GET', 'POST'],
+    )]
     public function initiateApplePaySessionAction(Request $request): Response
     {
         $configuration = $this->requestConfigurationFactory->create($this->metadata, $request);
@@ -133,7 +144,7 @@ final class OrderController extends BaseOrderController
 
             $postEventResponse = $postEvent->getResponse();
 
-            if (null !== $postEventResponse) {
+            if ($postEventResponse instanceof \Symfony\Component\HttpFoundation\Response) {
                 return $postEventResponse;
             }
 
@@ -141,7 +152,7 @@ final class OrderController extends BaseOrderController
 
             $initializeEventResponse = $initializeEvent->getResponse();
 
-            if (null !== $initializeEventResponse) {
+            if ($initializeEventResponse instanceof \Symfony\Component\HttpFoundation\Response) {
                 return $initializeEventResponse;
             }
 
@@ -168,7 +179,7 @@ final class OrderController extends BaseOrderController
             ]);
 
             return new JsonResponse([], Response::HTTP_BAD_REQUEST);
-        } catch (\Exception $exception) {
+        } catch (\Exception) {
             try {
                 $this->applePayPaymentProvider->cancel($resource);
             } catch (\Throwable $throwable) {
@@ -195,6 +206,22 @@ final class OrderController extends BaseOrderController
         }
     }
 
+    #[Route(
+        path: '/payplug/apple-pay/complete/{orderId}',
+        name: 'payplug_shop_checkout_apple_confirm',
+        options: [
+            '_sylius' => [
+                'flash' => false,
+                'repository' => [
+                    'method' => 'find',
+                    'arguments' => [
+                        'expr:service("PayPlug\\SyliusPayPlugPlugin\\Provider\\ApplePayOrderProvider").getCurrentCart()',
+                    ],
+                ],
+            ],
+        ],
+        methods: ['GET', 'POST'],
+    )]
     public function confirmApplePayPaymentAction(Request $request): Response
     {
         $configuration = $this->requestConfigurationFactory->create($this->metadata, $request);
@@ -226,7 +253,7 @@ final class OrderController extends BaseOrderController
             if (PaymentInterface::STATE_COMPLETED !== $lastPayment->getState()) {
                 throw new PaymentNotCompletedException();
             }
-        } catch (\Exception|PaymentNotCompletedException $exception) {
+        } catch (\Exception | PaymentNotCompletedException $exception) {
             try {
                 $this->applePayPaymentProvider->cancel($resource);
             } catch (\Throwable $throwable) {
@@ -255,7 +282,7 @@ final class OrderController extends BaseOrderController
 
         $postEventResponse = $postEvent->getResponse();
 
-        if (null !== $postEventResponse) {
+        if ($postEventResponse instanceof \Symfony\Component\HttpFoundation\Response) {
             return $postEventResponse;
         }
 
@@ -263,7 +290,7 @@ final class OrderController extends BaseOrderController
 
         $initializeEventResponse = $initializeEvent->getResponse();
 
-        if (null !== $initializeEventResponse) {
+        if ($initializeEventResponse instanceof \Symfony\Component\HttpFoundation\Response) {
             return $initializeEventResponse;
         }
 
@@ -292,6 +319,22 @@ final class OrderController extends BaseOrderController
         return new JsonResponse($response, Response::HTTP_OK);
     }
 
+    #[Route(
+        path: '/payplug/apple-pay/cancel/{orderId}',
+        name: 'payplug_shop_checkout_apple_cancel',
+        options: [
+            '_sylius' => [
+                'flash' => false,
+                'repository' => [
+                    'method' => 'find',
+                    'arguments' => [
+                        'expr:service("PayPlug\\SyliusPayPlugPlugin\\Provider\\ApplePayOrderProvider").getCurrentCart()',
+                    ],
+                ],
+            ],
+        ],
+        methods: ['GET', 'POST'],
+    )]
     public function cancelApplePaySessionAction(Request $request): Response
     {
         $configuration = $this->requestConfigurationFactory->create($this->metadata, $request);
@@ -301,7 +344,7 @@ final class OrderController extends BaseOrderController
         /** @var OrderInterface $resource */
         $resource = $this->findOr404($configuration);
 
-        $lock = $this->lockFactory->createLock('apple_pay_cancel'.$resource->getId());
+        $lock = $this->lockFactory->createLock('apple_pay_cancel' . $resource->getId());
         $lock->acquire(true);
 
         /** @var ResourceControllerEvent $event */
@@ -327,7 +370,7 @@ final class OrderController extends BaseOrderController
 
             $postEventResponse = $postEvent->getResponse();
 
-            if (null !== $postEventResponse) {
+            if ($postEventResponse instanceof \Symfony\Component\HttpFoundation\Response) {
                 return $postEventResponse;
             }
 
@@ -335,7 +378,7 @@ final class OrderController extends BaseOrderController
 
             $initializeEventResponse = $initializeEvent->getResponse();
 
-            if (null !== $initializeEventResponse) {
+            if ($initializeEventResponse instanceof \Symfony\Component\HttpFoundation\Response) {
                 return $initializeEventResponse;
             }
 

@@ -18,7 +18,6 @@ use PayPlug\SyliusPayPlugPlugin\PaymentProcessing\RefundPaymentProcessor;
 use PayPlug\SyliusPayPlugPlugin\Repository\RefundHistoryRepositoryInterface;
 use Payum\Core\Model\GatewayConfigInterface;
 use Psr\Log\LoggerInterface;
-use SM\Factory\FactoryInterface;
 use Sylius\Component\Core\Model\OrderInterface;
 use Sylius\Component\Core\Model\PaymentInterface;
 use Sylius\Component\Core\Model\PaymentMethodInterface;
@@ -36,56 +35,20 @@ use Webmozart\Assert\Assert;
 
 final class RefundPaymentGeneratedHandler
 {
-    /** @var EntityManagerInterface */
-    private $entityManager;
-
-    /** @var FactoryInterface */
-    private $stateMachineFactory;
-
-    /** @var RefundPaymentProcessor */
-    private $refundPaymentProcessor;
-
-    /** @var PaymentRepositoryInterface */
-    private $paymentRepository;
-
-    /** @var LoggerInterface */
-    private $logger;
-
-    /** @var RefundHistoryRepositoryInterface */
-    private $payplugRefundHistoryRepository;
-
-    /** @var OrderRepositoryInterface */
-    private $orderRepository;
-
-    /** @var TranslatorInterface */
-    private $translator;
-
-    /** @var RepositoryInterface */
-    private $refundPaymentRepository;
-    private RequestStack $requestStack;
+    public $stateMachineFactory;
 
     public function __construct(
-        EntityManagerInterface $entityManager,
-        PaymentRepositoryInterface $paymentRepository,
-        RepositoryInterface $refundPaymentRepository,
-        RefundHistoryRepositoryInterface $payplugRefundHistoryRepository,
-        FactoryInterface $stateMachineFactory,
-        RefundPaymentProcessor $refundPaymentProcessor,
-        LoggerInterface $logger,
-        RequestStack $requestStack,
-        OrderRepositoryInterface $orderRepository,
-        TranslatorInterface $translator
+        private EntityManagerInterface $entityManager,
+        private PaymentRepositoryInterface $paymentRepository,
+        private RepositoryInterface $refundPaymentRepository,
+        private RefundHistoryRepositoryInterface $payplugRefundHistoryRepository,
+        // private FactoryInterface $stateMachineFactory,
+        private RefundPaymentProcessor $refundPaymentProcessor,
+        private LoggerInterface $logger,
+        private RequestStack $requestStack,
+        private OrderRepositoryInterface $orderRepository,
+        private TranslatorInterface $translator,
     ) {
-        $this->entityManager = $entityManager;
-        $this->paymentRepository = $paymentRepository;
-        $this->refundPaymentRepository = $refundPaymentRepository;
-        $this->payplugRefundHistoryRepository = $payplugRefundHistoryRepository;
-        $this->stateMachineFactory = $stateMachineFactory;
-        $this->refundPaymentProcessor = $refundPaymentProcessor;
-        $this->logger = $logger;
-        $this->requestStack = $requestStack;
-        $this->orderRepository = $orderRepository;
-        $this->translator = $translator;
     }
 
     public function __invoke(RefundPaymentGenerated $message): void
@@ -114,9 +77,10 @@ final class RefundPaymentGeneratedHandler
             }
 
             $refundHistory = $this->payplugRefundHistoryRepository->findLastRefundForPayment($payment);
-            if ($refundHistory instanceof RefundHistory &&
+            if (
+                $refundHistory instanceof RefundHistory &&
                 null !== $refundHistory->getExternalId() &&
-                null === $refundHistory->getRefundPayment()
+                !$refundHistory->getRefundPayment() instanceof \Sylius\RefundPlugin\Entity\RefundPayment
             ) {
                 /** @var RefundPayment $refundPayment */
                 $refundPayment = $this->refundPaymentRepository->find($message->id());
@@ -174,7 +138,7 @@ final class RefundPaymentGeneratedHandler
 
             return $this->isLessThanFortyEightHours(
                 $order->getLastPayment()->getCreatedAt(),
-                $now
+                $now,
             );
         }
 
@@ -184,7 +148,7 @@ final class RefundPaymentGeneratedHandler
 
         return $this->isLessThanFortyEightHours(
             $refundHistory->getCreatedAt(),
-            $now
+            $now,
         );
     }
 
@@ -199,13 +163,15 @@ final class RefundPaymentGeneratedHandler
 
     private function checkOneyRequirements(
         PaymentInterface $payment,
-        RefundPaymentGenerated $message
+        RefundPaymentGenerated $message,
     ): void {
         Assert::isInstanceOf($payment->getMethod(), PaymentMethodInterface::class);
         Assert::isInstanceOf($payment->getMethod()->getGatewayConfig(), GatewayConfigInterface::class);
 
-        if (OneyGatewayFactory::FACTORY_NAME === $payment->getMethod()->getGatewayConfig()->getFactoryName() &&
-            $this->hasLessThanFortyEightHoursTransaction($payment, $message->orderNumber())) {
+        if (
+            OneyGatewayFactory::FACTORY_NAME === $payment->getMethod()->getGatewayConfig()->getFactoryName() &&
+            $this->hasLessThanFortyEightHoursTransaction($payment, $message->orderNumber())
+        ) {
             throw InvalidRefundAmount::withValidationConstraint($this->translator->trans('payplug_sylius_payplug_plugin.ui.oney_transaction_less_than_forty_eight_hours'));
         }
     }

@@ -19,31 +19,23 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\AsController;
+use Symfony\Component\Routing\Attribute\Route;
 
+#[AsController]
 class OneClickAction extends AbstractController implements GatewayAwareInterface, ApiAwareInterface
 {
     use GatewayAwareTrait;
     use ApiAwareTrait;
 
-    /** @var PaymentRepositoryInterface */
-    private $paymentRepository;
-
-    /** @var Payum */
-    private $payum;
-
-    /** @var PayPlugApiClientFactory */
-    private $payPlugApiClientFactory;
-
     public function __construct(
-        PaymentRepositoryInterface $paymentRepository,
-        Payum $payum,
-        PayPlugApiClientFactory $payPlugApiClientFactory
+        private PaymentRepositoryInterface $paymentRepository,
+        private Payum $payum,
+        private PayPlugApiClientFactory $payPlugApiClientFactory,
     ) {
-        $this->paymentRepository = $paymentRepository;
-        $this->payum = $payum;
-        $this->payPlugApiClientFactory = $payPlugApiClientFactory;
     }
 
+    #[Route(path: '/{_locale}/payment/capture/{payum_token}/1-click-checkup', name: 'payplug_sylius_oneclick_verification', methods: ['GET'])]
     public function __invoke(Request $request): Response
     {
         $token = $this->payum->getHttpRequestVerifier()->verify($request);
@@ -61,7 +53,7 @@ class OneClickAction extends AbstractController implements GatewayAwareInterface
             $paymentGateway->getGatewayName(),
             $payment,
             'sylius_shop_order_thank_you',
-            []
+            [],
         );
 
         $secretKey = $paymentGateway->getConfig()['secretKey'];
@@ -74,7 +66,8 @@ class OneClickAction extends AbstractController implements GatewayAwareInterface
         }
 
         //if both fields authorization and authorized_at are present and filled, the authorization was successful
-        if ($resource->__isset('authorization') &&
+        if (
+            $resource->__isset('authorization') &&
             $resource->__isset('authorized_at') &&
             null !== $resource->__get('authorization') &&
             null !== $resource->__get('authorized_at')
