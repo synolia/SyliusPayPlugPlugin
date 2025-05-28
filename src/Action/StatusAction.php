@@ -21,47 +21,49 @@ use Payum\Core\GatewayAwareInterface;
 use Payum\Core\GatewayAwareTrait;
 use Payum\Core\Request\GetHttpRequest;
 use Payum\Core\Request\GetStatusInterface;
+use Sylius\Abstraction\StateMachine\StateMachineInterface;
 use Sylius\Component\Core\Model\OrderInterface;
 use Sylius\Component\Core\Model\PaymentInterface;
-use Symfony\Component\DependencyInjection\Attribute\AsAlias;
+use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 use Symfony\Component\HttpFoundation\RequestStack;
 
-#[AsAlias(id: 'payplug_sylius_payplug_plugin.action.status', public: true)]
 #[AutoconfigureTag(
     name: 'payum.action',
     attributes: [
         'factory' => PayPlugGatewayFactory::FACTORY_NAME,
-        'alias' => 'payum.action.capture',
+        'alias' => 'payum.action.status',
     ],
 )]
 #[AutoconfigureTag(
     name: 'payum.action',
     attributes: [
         'factory' => OneyGatewayFactory::FACTORY_NAME,
-        'alias' => 'payum.action.capture',
+        'alias' => 'payum.action.status',
     ],
 )]
 #[AutoconfigureTag(
     name: 'payum.action',
     attributes: [
         'factory' => BancontactGatewayFactory::FACTORY_NAME,
-        'alias' => 'payum.action.capture',
+        'alias' => 'payum.action.status',
     ],
 )]
 #[AutoconfigureTag(
     name: 'payum.action',
     attributes: [
         'factory' => AmericanExpressGatewayFactory::FACTORY_NAME,
-        'alias' => 'payum.action.capture',
+        'alias' => 'payum.action.status',
     ],
 )]
+#[Autoconfigure(public: true)]
 final class StatusAction implements ActionInterface, GatewayAwareInterface, ApiAwareInterface
 {
     use GatewayAwareTrait;
     use ApiAwareTrait;
 
     public function __construct(
+        private StateMachineInterface $stateMachine,
         private RefundPaymentHandlerInterface $refundPaymentHandler,
         private PaymentNotificationHandler $paymentNotificationHandler,
         private RequestStack $requestStack,
@@ -177,14 +179,10 @@ final class StatusAction implements ActionInterface, GatewayAwareInterface, ApiA
         /** @var OrderInterface $order */
         $order = $payment->getOrder();
 
-        $stateMachine = $this->stateMachineFactory->get($order, OrderPaymentTransitions::GRAPH);
-
-        if (!$stateMachine->can(OrderPaymentTransitions::TRANSITION_REQUEST_PAYMENT)) {
+        if (!$this->stateMachine->can($order, OrderPaymentTransitions::GRAPH, OrderPaymentTransitions::TRANSITION_ONEY_REQUEST_PAYMENT)) {
             return;
         }
 
-        $this->stateMachineFactory
-            ->get($order, OrderPaymentTransitions::GRAPH)
-            ->apply(OrderPaymentTransitions::TRANSITION_REQUEST_PAYMENT);
+        $this->stateMachine->apply($order, OrderPaymentTransitions::GRAPH, OrderPaymentTransitions::TRANSITION_ONEY_REQUEST_PAYMENT);
     }
 }

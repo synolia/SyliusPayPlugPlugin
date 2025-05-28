@@ -22,39 +22,39 @@ use Payum\Core\GatewayAwareInterface;
 use Payum\Core\GatewayAwareTrait;
 use Payum\Core\Request\Notify;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\DependencyInjection\Attribute\AsAlias;
+use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
-#[AsAlias(id: 'payplug_sylius_payplug_plugin.action.notify', public: true)]
 #[AutoconfigureTag(
     name: 'payum.action',
     attributes: [
         'factory' => PayPlugGatewayFactory::FACTORY_NAME,
-        'alias' => 'payum.action.capture',
+        'alias' => 'payum.action.notify',
     ],
 )]
 #[AutoconfigureTag(
     name: 'payum.action',
     attributes: [
         'factory' => OneyGatewayFactory::FACTORY_NAME,
-        'alias' => 'payum.action.capture',
+        'alias' => 'payum.action.notify',
     ],
 )]
 #[AutoconfigureTag(
     name: 'payum.action',
     attributes: [
         'factory' => BancontactGatewayFactory::FACTORY_NAME,
-        'alias' => 'payum.action.capture',
+        'alias' => 'payum.action.notify',
     ],
 )]
 #[AutoconfigureTag(
     name: 'payum.action',
     attributes: [
         'factory' => AmericanExpressGatewayFactory::FACTORY_NAME,
-        'alias' => 'payum.action.capture',
+        'alias' => 'payum.action.notify',
     ],
 )]
+#[Autoconfigure(public: true)]
 final class NotifyAction implements ActionInterface, ApiAwareInterface, GatewayAwareInterface
 {
     use GatewayAwareTrait;
