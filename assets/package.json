@@ -16,7 +16,7 @@
   "symfony": {
     "controllers": {
       "oney-popin": {
-        "main": "controllers/oney/popin_controller.js",
+        "main": "shop/controllers/oney-popin_controller.js",
         "enabled": true,
         "webpackMode": "lazy",
         "fetch": "lazy",
@@ -29,7 +29,10 @@
         "main": "shop/controllers/integrated-payment_controller.js",
         "webpackMode": "lazy",
         "fetch": "lazy",
-        "enabled": true
+        "enabled": true,
+        "autoimport": {
+          "@payplug/sylius-payplug-plugin/dist/shop/payment/integrated.css": true
+        }
       },
       "oney-payment": {
         "main": "shop/controllers/oney-payment_controller.js",
@@ -39,6 +42,21 @@
       },
       "payment-logo": {
         "main": "shop/controllers/payment-logo_controller.js",
+        "webpackMode": "lazy",
+        "fetch": "lazy",
+        "enabled": true
+      },
+      "checkout-select-payment": {
+        "main": "shop/controllers/checkout-select-payment_controller.js",
+        "autoimport": {
+          "@payplug/sylius-payplug-plugin/dist/shop/payment/index.css": true
+        },
+        "webpackMode": "lazy",
+        "fetch": "lazy",
+        "enabled": true
+      },
+      "apple-pay": {
+        "main": "shop/controllers/apple-pay_controller.js",
         "webpackMode": "lazy",
         "fetch": "lazy",
         "enabled": true
