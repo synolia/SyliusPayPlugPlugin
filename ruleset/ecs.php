@@ -11,9 +11,9 @@ return static function (ECSConfig $ecsConfig): void {
         dirname(__DIR__, 1) . '/src',
         dirname(__DIR__, 1) . '/tests/Behat',
         dirname(__DIR__, 1) . '/tests/PHPUnit',
-        dirname(__DIR__, 1) . '/spec',
     ]);
 
     /** @phpstan-ignore-next-line  */
     $ecsConfig->rule(\SlevomatCodingStandard\Sniffs\Classes\RequireMultiLineMethodSignatureSniff::class);
+    $ecsConfig->skip([\PhpCsFixer\Fixer\Basic\BracesFixer::class]);
 };
