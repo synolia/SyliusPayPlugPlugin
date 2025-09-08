@@ -25,9 +25,7 @@ final class PayPlugSyliusPayPlugExtension extends Extension implements PrependEx
         $xmlloader = new XmlFileLoader($container, new FileLocator(dirname(__DIR__, 2) . '/config/services'));
 
         $ymlloader->load('services.yaml');
-        // TODO: migrate to YAML
         $xmlloader->load('client.xml');
-        $xmlloader->load('gateway.xml');
     }
 
     public function prepend(ContainerBuilder $container): void
@@ -42,12 +40,10 @@ final class PayPlugSyliusPayPlugExtension extends Extension implements PrependEx
             return;
         }
 
-        // TODO: check if still mandatory on v2
         $container->prependExtensionConfig('twig', [
             'form_themes' => [
                 '@PayPlugSyliusPayPlugPlugin/form/form_gateway_config_row.html.twig',
                 '@PayPlugSyliusPayPlugPlugin/form/sylius_checkout_select_payment_row.html.twig',
-                '@PayPlugSyliusPayPlugPlugin/form/complete_info_popin.html.twig',
             ],
         ]);
     }
