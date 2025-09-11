@@ -29,10 +29,8 @@ payplug_sylius_payplug_plugin:
         error:
             billing.postcode: The postal code %postalCode% entered for the billing address is invalid
             shipping.postcode: The postal code %postalCode% entered for the delivery address is invalid
-        secret_key: Secret key
         payplug_gateway_label: Payplug
         payment_refund_locally: The payment refund was made locally only.
-        retrieve_secret_key_in_api_configuration_portal: Find your LIVE and TEST Secret Keys in your <a href="https://portal.payplug.com/#/configuration/api" target="_blank">Payplug portal</a>
         test_mode: TEST Mode
         payplug_id: |
             Payplug ID: %paymentId%
@@ -109,6 +107,13 @@ payplug_sylius_payplug_plugin:
         deferred_capture:
             process_order_info: |
                 You will be charged when your order is processed.
+        live: LIVE Mode
+        live_help: |
+            When this option is enabled, <b>LIVE</b> mode is used. <br>
+            If disabled, <b>TEST</b> mode will be applied
+        renew_oauth: Force OAuth reconnection
+        renew_oauth_help: |
+            If this option is checked, a new authentication flow will be started when clicking the "<b>Update</b>" button.
     form:
         oney_error: Some missing information is required to pay using Oney by Payplug
         complete_info:

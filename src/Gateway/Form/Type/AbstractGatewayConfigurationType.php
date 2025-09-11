@@ -6,29 +6,23 @@ namespace PayPlug\SyliusPayPlugPlugin\Gateway\Form\Type;
 
 use Doctrine\Common\Collections\Collection;
 use PayPlug\SyliusPayPlugPlugin\Gateway\PayPlugGatewayFactory;
-use PayPlug\SyliusPayPlugPlugin\Gateway\Validator\Constraints\IsCanSavePaymentMethod;
-use PayPlug\SyliusPayPlugPlugin\Gateway\Validator\Constraints\IsOneyEnabled;
-use PayPlug\SyliusPayPlugPlugin\Gateway\Validator\Constraints\IsPayPlugSecretKeyValid;
 use Sylius\Bundle\PayumBundle\Model\GatewayConfigInterface;
 use Sylius\Component\Core\Model\ChannelInterface;
 use Sylius\Component\Resource\Repository\RepositoryInterface;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 class AbstractGatewayConfigurationType extends AbstractType
 {
     public const VALIDATION_GROUPS = ['Default', 'sylius'];
 
-    protected string $noTestKeyMessage = '';
-    protected string $noAccessMessage = '';
     protected string $gatewayFactoryTitle = '';
     protected string $gatewayFactoryName = '';
 
@@ -47,22 +41,19 @@ class AbstractGatewayConfigurationType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('secretKey', PasswordType::class, [
-                'label' => 'payplug_sylius_payplug_plugin.ui.secret_key',
-                'validation_groups' => self::VALIDATION_GROUPS,
-                'constraints' => [
-                    new NotBlank([
-                        'message' => 'payplug_sylius_payplug_plugin.secret_key.not_blank',
-                    ]),
-                    new IsPayPlugSecretKeyValid(),
-                    new IsCanSavePaymentMethod([
-                        'noTestKeyMessage' => $this->noTestKeyMessage,
-                        'noAccessMessage' => $this->noAccessMessage,
-                    ]),
-                    new IsOneyEnabled(),
-                ],
-                'help' => $this->translator->trans('payplug_sylius_payplug_plugin.ui.retrieve_secret_key_in_api_configuration_portal'),
+            ->add('live', CheckboxType::class, [
+                'block_name' => 'payplug_checkbox',
+                'label' => 'payplug_sylius_payplug_plugin.ui.live',
+                'help' => 'payplug_sylius_payplug_plugin.ui.live_help',
                 'help_html' => true,
+                'required' => false,
+            ])
+            ->add('renew_oauth', CheckboxType::class, [
+                'label' => 'payplug_sylius_payplug_plugin.ui.renew_oauth',
+                'help' => 'payplug_sylius_payplug_plugin.ui.renew_oauth_help',
+                'help_html' => true,
+                'mapped' => false,
+                'required' => false,
             ])
             ->addEventListener(FormEvents::PRE_SUBMIT, function (FormEvent $event): void {
                 $this->checkCreationRequirements(
